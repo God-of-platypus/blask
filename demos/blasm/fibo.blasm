@@ -1,0 +1,16 @@
+# Input: 1
+# Output: 2
+@Fibo
+addi 1, 0, 10 # number of iterations
+addi 2, 0, 0 # fibo(n-1)
+addi 3, 0, 1 # fibo(n)
+
+be 1, 0, 8 # you can skip if the iteration is 0
+
+@Loop
+subi 1, 1, 1 # decrement counter (register 1)
+add 4, 0, 3 # tmp = fibo(n)
+add 3, 3, 2 # fibo(n) = fibo(n) + fibo(n-1)
+add 2, 0, 4 # fibo(n-1) = tmp
+
+bne 1, 0, @Loop

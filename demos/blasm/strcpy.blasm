@@ -1,0 +1,14 @@
+# A: Output
+# H, N: Input
+@strcpy
+ld C, 0 # Counter
+
+@loop
+jeq C, N, @end
+ld B, [H + C]
+str B, [A + C]
+add C, C, 1
+jmp @loop
+
+@end
+#Return instruction

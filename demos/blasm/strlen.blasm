@@ -1,0 +1,16 @@
+# A: Output
+# H: Input
+@Strlen
+push H
+ld A, 0 # Length
+
+@loop
+ld B, [H]
+jeq B, Z, @end
+add A, A, 1
+add H, H, 1
+jmp @loop
+
+@end
+pop H
+#Return instruction

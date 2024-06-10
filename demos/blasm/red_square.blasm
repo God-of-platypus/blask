@@ -1,0 +1,16 @@
+# The position is stored in r1
+addi 2, 0, 3480 # r2 = red
+addi 3, 0, 1 # r3 = 100 (number of iterations)
+addi 4, 0, 0 # r2 = black
+
+@Loop:
+
+# Red at addr r1 + 1
+str 1, 2, 1
+# Black at addr r1 + 0
+str 1, 4, 0
+addi 1, 1, 1 # r1 = r1 + 1
+
+subi 3, 3, 1 # r3 = r3 - 1
+
+bne 0, 3, @Loop

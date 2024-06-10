@@ -1,0 +1,10 @@
+[package]
+name = "blaast"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+blalst = { path = "../blalst" }
+blarse = { path = "../blarse" }
+blib = { path = "../blib" }
+blex = { path = "../blex" }

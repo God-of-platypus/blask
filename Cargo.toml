@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "asmlib",
+    "blaast",
+    "blalst",
+    "blarch",
+    "blarse",
+    "blas",
+    "blex",
+    "blib",
+    "assembler",
+    "emulator",
+    "files",
+    "riscvi",
+    "cpu",
+    "instruction"
+]
+resolver = "2"

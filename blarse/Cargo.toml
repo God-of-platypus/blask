@@ -1,0 +1,9 @@
+[package]
+name = "blarse"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+blalst = { path = "../blalst" }
+blex = { path = "../blex" }
+blib = { path = "../blib" }
