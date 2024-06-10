@@ -140,6 +140,82 @@ pub fn or(_cpu:&mut Cpu, instruction: u32) {
     _cpu.registers[rd] = _cpu.registers[rs1] | _cpu.registers[rs2];
 }
 
+//  ! 
+//  !   THINK WHERE WE SHOULD INCREMENT PC
+//  !
+// Branches
+pub fn jal(_cpu:&mut Cpu, instruction: u32) {
+    let rd = ((instruction >> 7) & 0x1f) as usize;
+    // [10:1] + [11] + [19:12] + [20], looks like shit
+
+    let imm = (((instruction >> 21) & 0x3ff) << 1) + (((instruction >> 20) & 0x01) << 11)  + (((instruction >> 12) & 0xff) << 12) +  (((instruction >> 31) & 0x1) << 31) as u32;
+    _cpu.pc = imm;
+    _cpu.registers[rd] = _cpu.pc + 4;
+}
+
+pub fn jalr(_cpu:&mut Cpu, instruction: u32) {
+    let rd = ((instruction >> 7) & 0x1f) as usize;
+    let rs1 = ((instruction >> 15) & 0x1f) as u32;
+    let imm = ((instruction >> 20) & 0xfff) as u32;
+    _cpu.pc = (imm + rs1) & 0xFFFFFFFE; // Least significant bit to 0 (2 byte displacement)
+    _cpu.registers[rd] = _cpu.pc + 4;
+}
+
+// Conditional, literraly the same except the comparison
+// Overwrite with impl?
+pub fn beq(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    _cpu.pc = if _cpu.registers[rs1] == _cpu.registers[rs2] {imm} else {_cpu.pc + 2};
+}
+
+pub fn bne(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    _cpu.pc = if _cpu.registers[rs1] != _cpu.registers[rs2] {imm} else {_cpu.pc + 2};
+}
+
+pub fn blt(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    // Sign change
+    _cpu.pc = if (_cpu.registers[rs1] as i32) < (_cpu.registers[rs2] as i32) {imm} else {_cpu.pc + 2};
+}
+
+pub fn bltu(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    _cpu.pc = if _cpu.registers[rs1] < _cpu.registers[rs2] {imm} else {_cpu.pc + 2};
+}
+
+pub fn bge(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    // Sign change
+    _cpu.pc = if (_cpu.registers[rs1] as i32) > (_cpu.registers[rs2] as i32) {imm} else {_cpu.pc + 2};
+}
+
+pub fn bgeu(_cpu:&mut Cpu, instruction: u32) {
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    // [4:1] + [11] + [10:5] + [12]
+    let imm = (((instruction >> 7) & 0x1e)) + (((instruction >> 7) & 0x1) << 11) + (((instruction >> 25) & 0x3f) << 5) + (((instruction >> 25) & 0x10) << 12);
+    _cpu.pc = if _cpu.registers[rs1] > _cpu.registers[rs2] {imm} else {_cpu.pc + 2};
+}
+
+// Load and Store
+
+
 #[cfg(test)]
 mod tests {
     use cpu::Cpu;
@@ -341,5 +417,27 @@ mod tests {
         cpu.registers[2] = 0x55555555;
         or(&mut cpu, instruction);
         assert_eq!(cpu.registers[0],0xFFFFFFFF);
+    }
+
+    #[test]
+    fn jal_test() {
+        let mut cpu = Cpu::new(1024);
+        let instruction =0x546740ef; // jal x1, 0x2
+        //(((instruction >> 21) & 0x3ff) << 1) + (((instruction >> 20) & 0x01) << 11)  + (((instruction >> 12) & 0xff) << 12) +  (((instruction >> 31) & 0x1) << 31) as u32;
+        println!("{:x}",(((instruction >> 21) & 0x3ff)) << 1);
+        cpu.registers[1] = 0x00000000;
+        jal(&mut cpu, instruction);
+        assert_eq!(cpu.registers[1],cpu.pc+4);
+        assert_eq!(cpu.pc,0x74564);
+    }
+
+    #[test]
+    fn beq_test() {
+        let mut cpu = Cpu::new(1024);
+        let instruction =0x56110A80; // beq x1, x2, 0x6BA
+        cpu.registers[1] = 0x00000020;
+        cpu.registers[2] = 0x00000020;
+        beq(&mut cpu, instruction);
+        assert_eq!(cpu.pc,0xD74);
     }
 }
