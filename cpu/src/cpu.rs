@@ -2,7 +2,7 @@
 pub struct Cpu {
     pub registers: [u32; 32],
     pub pc: u32,
-    pub memory: Vec<u8>,
+    pub memory: Vec<u32>,
     pub csrs: [u32; 4096],
 }
 

@@ -215,6 +215,81 @@ pub fn bgeu(_cpu:&mut Cpu, instruction: u32) {
 
 // Load and Store
 
+// all loads are distinguished by their funct3
+// my load however can be distinguished by its creamy white color
+// and its absolute thikness
+pub fn lw(_cpu:&mut Cpu, instruction: u32){
+    let imm = ((instruction >> 20) & 0x3ff) as u32;
+    let rs1 =  ((instruction >> 15) & 0x1f) as usize;
+    let rd =  ((instruction >> 7) & 0x1f) as usize;
+    // MIGHT be a good idea to check for unaligned accesses and out of memory acesses
+    _cpu.registers[rd] = _cpu.memory[(_cpu.registers[rs1] + imm) as usize];
+}
+
+pub fn lh(_cpu:&mut Cpu, instruction: u32){
+    let imm = ((instruction >> 20) & 0x3ff) as u32;
+    let rs1 =  ((instruction >> 15) & 0x1f) as usize;
+    let rd =  ((instruction >> 7) & 0x1f) as usize;
+    // MIGHT be a good idea to check for unaligned accesses and out of memory acesses
+    // sign extend!!!
+    let unsigned_val = _cpu.memory[(_cpu.registers[rs1] + imm) as usize] as u32;
+    // check bit 16
+    let sign_extended = if ((unsigned_val & 0x8000) >> 15) == 1 {unsigned_val & 0x7fff + (1 << 31)} else {unsigned_val & 0xffff};
+    _cpu.registers[rd] = sign_extended;
+}
+
+pub fn lhu(_cpu:&mut Cpu, instruction: u32){
+    let imm = ((instruction >> 20) & 0x3ff) as u32;
+    let rs1 =  ((instruction >> 15) & 0x1f) as usize;
+    let rd =  ((instruction >> 7) & 0x1f) as usize;
+    // MIGHT be a good idea to check for unaligned accesses and out of memory acesses
+    // sign extend!!!
+    let unsigned_val = _cpu.memory[(_cpu.registers[rs1] + imm) as usize] as u32;
+    _cpu.registers[rd] = unsigned_val & 0xffff;
+}
+
+pub fn lb(_cpu:&mut Cpu, instruction: u32){
+    let imm = ((instruction >> 20) & 0x3ff) as u32;
+    let rs1 =  ((instruction >> 15) & 0x1f) as usize;
+    let rd =  ((instruction >> 7) & 0x1f) as usize;
+    // MIGHT be a good idea to check for unaligned accesses and out of memory acesses
+    // sign extend!!!
+    let unsigned_val = _cpu.memory[(_cpu.registers[rs1] + imm) as usize] as u32;
+    // check bit 8
+    let sign_extended = if ((unsigned_val & 0x80) >> 7) == 1 {unsigned_val & 0x7f + (1 << 31)} else {unsigned_val & 0xff};
+    _cpu.registers[rd] = sign_extended;
+}
+
+pub fn lbu(_cpu:&mut Cpu, instruction: u32){
+    let imm = ((instruction >> 20) & 0x3ff) as u32;
+    let rs1 =  ((instruction >> 15) & 0x1f) as usize;
+    let rd =  ((instruction >> 7) & 0x1f) as usize;
+    // MIGHT be a good idea to check for unaligned accesses and out of memory acesses
+    // sign extend!!!
+    let unsigned_val = _cpu.memory[(_cpu.registers[rs1] + imm) as usize] as u32;
+    _cpu.registers[rd] = unsigned_val & 0xff;
+}
+
+pub fn sw(_cpu:&mut Cpu, instruction: u32) {
+    let imm = ((instruction >> 7) & 0x1f) + (((instruction >> 25) & 0x7f) << 5) as u32;
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    _cpu.memory[(_cpu.registers[rs1] + imm) as usize] = _cpu.registers[rs2];
+}
+
+pub fn sh(_cpu:&mut Cpu, instruction: u32) {
+    let imm = ((instruction >> 7) & 0x1f) + (((instruction >> 25) & 0x7f) << 5) as u32;
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    _cpu.memory[(_cpu.registers[rs1] + imm) as usize] = _cpu.registers[rs2] & 0xffff;
+}
+
+pub fn sb(_cpu:&mut Cpu, instruction: u32) {
+    let imm = ((instruction >> 7) & 0x1f) + (((instruction >> 25) & 0x7f) << 5) as u32;
+    let rs1 = ((instruction >> 15) & 0x1f) as usize;
+    let rs2 = ((instruction >> 20) & 0x1f) as usize;
+    _cpu.memory[(_cpu.registers[rs1] + imm) as usize] = _cpu.registers[rs2] & 0xff;
+}
 
 #[cfg(test)]
 mod tests {
